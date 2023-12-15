@@ -1,0 +1,12 @@
+﻿Crystal Base Stats,,,,
+ID Tag,Description,Parameter,Default Value,Test Value
+cb1,Crystals Max Base [Max Health],[Max Health],100,-1
+cb2,Crystal Max Base [Max Spawn Energy],[Max Spawn Energy],100,-1
+cb3,Crystal Threatened Range,[Threat Range],30,-1
+cb4,Crystal danger range,[Danger Range],10,-1
+cb5,The radius tested for overlap,[Self Range],0.3,-1
+cs1,Spawning cool down time,[Spawn Cooldown Time],15,-1
+cs2,The time to recharge its spawn energy,[Spawn Energy Recharge Time],10,-1
+cs3,The radius the crystal can spawn in,[Spawn Radius],5,-1
+cc1,The Minimum shards that can be spawned,[Shard Spawn Min],2,-1
+cc2,The Maximum shards that can be spawned,[Shard Spawn Max],5,-1

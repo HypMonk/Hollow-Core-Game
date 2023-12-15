@@ -1,0 +1,16 @@
+Tank Base Stats,,,,
+ID Tag,Description,Parameter,Default Value,Test Value
+tb1,The Tanks Health,[Health],60,-1
+tb2,The cost to spawn the Tank,[Spawn Cost],60,-1
+tb3,The minimum Tanks spawned by the Crystal,[Spawn Quantity Min],1,-1
+tb4,The maximum Tanks spawned by the Crystal,[Spawn Quantity Max],2,-1
+tm1,The speed to move the Tank,[Move Speed],2.5,-1
+tm2,The speed debuff of the Tank,[Speed Debuff],0,-1
+tc1,The strength to knockback the target,[Knockback Strength],25,-1
+tc2,The speed to attack,[Attack Speed],5,-1
+tc3,The range to attack from,[Attack Range],1.5,-1
+tc4,The damage of an attack to the target,[Attack Damage],20,-1
+tc5,The resistance to knockback the target,[Knockback Resistance],20,-1
+tc6,The throwing strength of the Tank,[Throw Strength],40,-1
+tc7,The minimum shard droped by the Tank on Death,[Shard Spawn Min],2,-1
+tc8,The maximum shard droped by the Tank on Death,[Shard Spawn Max],5,-1

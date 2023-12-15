@@ -1,0 +1,16 @@
+Light Sucker Base Stats,,,,
+ID Tag,Description,Parameter,Default Value,Test Value
+lsb1,The Light Suckers Health,[Health],20,-1
+lsb2,The cost to spawn the Light Sucker,[Spawn Cost],10,-1
+lsb3,The minimum Light Suckers spawned by the Crystal,[Spawn Quantity Min],2,-1
+lsb4,The maximum Light Suckers spawned by the Crystal,[Spawn Quantity Max],4,-1
+lsm1,The speed to move the Light Sucker,[Move Speed],5,-1
+lsm2,The speed debuff of the Light Sucker,[Speed Debuff],0,-1
+lsc1,The strength to knockback the target,[Knockback Strength],1,-1
+lsc2,The speed to attack,[Attack Speed],20,-1
+lsc3,The range to attack from,[Attack Range],2,-1
+lsc4,The damage of an attack to the target,[Attack Damage],0,-1
+lsc5,The resistance to knockback the target,[Knockback Resistance],10,-1
+lsc6,The suck strength of the Light Sucker,[Suck Strength],1,-1
+lsc7,The minimum shard droped by the Light Sucker on Death,[Shard Spawn Min],2,-1
+lsc8,The maximum shard droped by the Light Sucker on Death,[Shard Spawn Max],5,-1

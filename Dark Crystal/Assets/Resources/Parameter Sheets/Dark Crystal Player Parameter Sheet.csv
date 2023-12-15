@@ -1,0 +1,47 @@
+Player Base Stats,,,,
+ID Tag,Description,Parameter,Default Value,Test Value
+pb1,Players Max Base [Max Health],[Max Health],100,-1
+pb2,Players Max Base [Max Stamina],[Max Stamina],100,-1
+pb3,Players Max Base [Max Light Level],[Max Light Level],100,-1
+pb4,The rate at which the player recharges stamina,[Stamina Recharge Rate],3,-1
+pb5,The time delay for the player to start recharging stamina,[Stamina Recharge Delay],4,-1
+pb6,The rate at which the player recharges Light Level,[Light Level Recharge Rate],5,-1
+pm1,Players base movement speed,[Speed],5,-1
+pm2,The speed at which a player can slide,[Slide Speed],20,-1
+pm3,The distance a player can slide,[Slide Distance],3,-1
+pm4,The stamina cost to slide,[Slide Stamina Cost],15,-1
+pi1,The Animation time to light a torch by hand,[Torch Light Animation Time],.5,-1
+pi2,The Animation time to pick-up a torch,[Torch Pick-Up Animation Time],.5,-1
+pi3,The Animation time to drop an item,[Item Drop Animation Time],.5,-1
+pi4,The Debuff to speed value for carrying an item,[Carrying Speed Debuff],2.5,-1
+pc1,The players resistence to knockback,[Knockback Resistance],10,-1
+pa_lm1,Stamina cost of a Light Melee Attack,[Light Melee Attack Stamina Cost],2,-1
+pa_lm2,Light Level cost of a Light Melee Attack,[Light Melee Attack Light Level Cost],0,-1
+pa_lm3,The Animation time of a Light Melee Attack,[Light Melee Attack Animation Time],-1,-1
+pa_lm4,The speed at which the Light Melee Attack Takes,[Light Melee Attack Speed],15,-1
+pa_lm5,The Damage a Light Melee Attack Causes,[Light Melee Attack Damage],10,-1
+pa_lm6,The knockback force a Light Melee Attack has,[Light Melee Attack Knockback Strength],20,-1
+pa_lm7,The distance away from the player a Light Melee Attack can hit,[Light Melee Attack AoE Radius],1.5,-1
+pa_lm8,The Angle in Degrees the Light Melee Attack can hit,[Light Melee Attack AoE Size],40,-1
+pa_hm1,Stamina cost of a Heavy Melee Attack,[Heavy Melee Attack Stamina Cost],10,-1
+pa_hm2,Light Level cost of a Heavy Melee Attack,[Heavy Melee Attack Light Level Cost],0,-1
+pa_hm3,The Animation time of a Heavy Melee Attack,[Heavy Melee Attack Animation Time],-1,-1
+pa_hm4,The speed at which the Heavy Melee Attack Takes,[Heavy Melee Attack Speed],15,-1
+pa_hm5,The Damage a Heavy Melee Attack Causes,[Heavy Melee Attack Damage],30,-1
+pa_hm6,The knockback force a Heavy Melee Attack has,[Heavy Melee Attack Knockback Strength],30,-1
+pa_hm7,The distance away from the player a Heavy Melee Attack can hit,[Heavy Melee Attack AoE Radius],3,-1
+pa_hm8,The Angle in Degrees the Heavy Melee Attack can hit,[Heavy Melee Attack AoE Size],90,-1
+pa_lr1,Stamina cost of a Light Ranged Attack,[Light Ranged Attack Stamina Cost],0,-1
+pa_lr2,Light Level cost of a Light Ranged Attack,[Light Ranged Attack Light Level Cost],2,-1
+pa_lr3,The Animation time of a Light Ranged Attack,[Light Ranged Attack Animation Time],-1,-1
+pa_lr4,The speed at which the Light Ranged Attack Takes,[Light Ranged Attack Speed],20,-1
+pa_lr5,The Damage a Light Ranged Attack Causes,[Light Ranged Attack Damage],5,-1
+pa_lr6,The knockback force a Light Ranged Attack has,[Light Ranged Attack Knockback Strength],10,-1
+pa_lr7,The speed the Light Ranged Attack's projectile travels,[Light Ranged Attack Projectile Speed],20,-1
+pa_hr1,Stamina cost of a Heavy Ranged Attack,[Heavy Ranged Attack Stamina Cost],0,-1
+pa_hr2,Light Level cost of a Heavy Ranged Attack,[Heavy Ranged Attack Light Level Cost],20,-1
+pa_hr3,The Animation time of a Heavy Ranged Attack,[Heavy Ranged Attack Animation Time],-1,-1
+pa_hr4,The speed at which the Heavy Ranged Attack Takes,[Heavy Ranged Attack Speed],8,-1
+pa_hr5,The Damage a Heavy Ranged Attack Causes,[Heavy Ranged Attack Damage],50,-1
+pa_hr6,The knockback force a Heavy Ranged Attack has,[Heavy Ranged Attack Knockback Strength],15,-1
+pa_hr7,The speed the Heavy Ranged Attack's projectile travels,[Heavy Ranged Attack Projectile Speed],15,-1
