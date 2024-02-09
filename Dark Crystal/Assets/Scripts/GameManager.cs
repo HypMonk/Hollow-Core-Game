@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,10 @@ public class GameManager : MonoBehaviour
     public static bool usingTestVariables = false;
 
     GameObject _player;
+
+    PlayerControlsTest _pControls;
+
+    InputAction pause;
 
     float _gameTimer;
     [HideInInspector]
@@ -25,6 +30,25 @@ public class GameManager : MonoBehaviour
     GameObject[] crystalSpawnLocations;
     [SerializeField] GameObject darkCrystalPrefab;
     bool crystalSpawnInvoked = false;
+
+    private void Awake()
+    {
+        _pControls = new PlayerControlsTest();
+    }
+
+    private void OnEnable()
+    {
+        pause = _pControls.UI.Pause;
+        pause.Enable();
+        pause.performed += PauseGameEvent;
+
+    }
+
+    private void OnDisable()
+    {
+        pause.Disable();
+
+    }
 
     public GameState CurrentState{ get { return _currentState; } }
 
@@ -52,10 +76,6 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Pause"))
-        {
-            TogglePauseGame();
-        }
 
         _gameTimer += Time.deltaTime;
         TimeConversion();
@@ -66,6 +86,11 @@ public class GameManager : MonoBehaviour
             crystalSpawnInvoked = true;
             StartCoroutine(SpawnCrystal());
         }
+    }
+
+    void PauseGameEvent(InputAction.CallbackContext context)
+    {
+        TogglePauseGame();
     }
 
     public void TogglePauseGame()

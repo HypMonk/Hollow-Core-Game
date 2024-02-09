@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
@@ -20,6 +21,10 @@ public class UIManager : MonoBehaviour
 
     GameObject _pauseLastSelectedButton, _lastSelectedButton;
 
+    PlayerControlsTest _pControls;
+
+    InputAction back;
+
     [SerializeField]
     TMP_Text _uiTimer, _shardCount;
     [SerializeField]
@@ -33,6 +38,24 @@ public class UIManager : MonoBehaviour
     TMP_Dropdown _parameterSheetDropDown;
     [SerializeField]
     TMP_Text _parameterReader;
+
+    private void Awake()
+    {
+        _pControls = new PlayerControlsTest();
+    }
+
+    private void OnEnable()
+    {
+        back = _pControls.UI.Back;
+        back.Enable();
+        back.performed += BackMenu;
+    }
+
+    private void OnDisable()
+    {
+        back.Disable();
+
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -82,17 +105,13 @@ public class UIManager : MonoBehaviour
 
         }
 
-        if (GameManager.isPaused && Input.GetButtonDown("Cancel"))
-        {
-            BackMenu();
-        }
-
         _uiTimer.text = BuildTimer();
         _healthBar.value = playerStats.Health;
         _staminaBar.value = playerStats.Stamina;
         _powerBar.value = playerStats.LightLevel;
         _shardCount.text = "Shards: " + playerInventory.Shards;
     }
+
 
     string BuildTimer()
     {
@@ -108,8 +127,9 @@ public class UIManager : MonoBehaviour
         return _hours + ":" + _minutes + ":" + _seconds;
     }
 
-    void BackMenu()
+    void BackMenu(InputAction.CallbackContext context)
     {
+        if (!GameManager.isPaused) return;
         if (_rootMenu == null) 
         {
             gameManager.TogglePauseGame();

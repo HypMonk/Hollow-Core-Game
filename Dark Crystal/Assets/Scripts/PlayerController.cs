@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,8 +9,22 @@ public class PlayerController : MonoBehaviour
     PlayerStats _stats;
     [SerializeField]
     GameObject _attackPoint;
+    float attackPointMaxRadius = .65f;
+
+
     [SerializeField]
     PlayerAnimationController _playerAnimationController;
+    
+    PlayerControlsTest _pControls;
+
+    InputAction move;
+    InputAction look;
+    InputAction interact;
+    InputAction lightMelee;
+    InputAction lightRange;
+    InputAction heavyMelee;
+    InputAction heavyRange;
+    InputAction slide;
 
     public PlayerStates playerState;
 
@@ -22,6 +37,7 @@ public class PlayerController : MonoBehaviour
 
     Vector3 _savedAttackPointDirection;
     Vector2 _lastMovementDirection;
+    Vector3 _attackPointDirection;
 
     bool isSliding = false;
     Vector3 slideDir;
@@ -49,20 +65,74 @@ public class PlayerController : MonoBehaviour
     float recordedStamina = 100;
     float staminaRechargeTimer = 0;
 
+    private void Awake()
+    {
+        _pControls = new PlayerControlsTest();
+    }
+
+    private void OnEnable()
+    {
+        move = _pControls.Player.Move;
+        move.Enable();
+
+        look = _pControls.Player.Look;
+        look.Enable();
+        look.performed += LookInput;
+
+        interact = _pControls.Player.Interact;
+        interact.Enable();
+        interact.performed += Interact;
+
+        slide = _pControls.Player.Slide;
+        slide.Enable();
+        slide.performed += SlideTrigger;
+
+        lightMelee = _pControls.Player.LightMelee;
+        lightMelee.Enable();
+        lightMelee.performed += LightMeleeAttack;
+
+        lightRange = _pControls.Player.LightRange;
+        lightRange.Enable();
+        lightRange.performed += LightRangeAttack;
+
+        heavyMelee = _pControls.Player.HeavyMelee;
+        heavyMelee.Enable();
+        heavyMelee.performed += HeavyMeleeAttack;
+
+        heavyRange = _pControls.Player.HeavyRange;
+        heavyRange.Enable();
+        heavyRange.performed += HeavyRangeAttack;
+    }
+
+    private void OnDisable()
+    {
+        move.Disable();
+        look.Disable();
+        interact.Disable();
+        slide.Disable();
+        lightMelee.Disable();
+        lightRange.Disable();
+        heavyMelee.Disable();
+        heavyRange.Disable();
+        
+    }
+
     public bool BeingCarried { get { return beingCarried; } }
 
     private void Start()
     {
         darkCrystalConversions = new DarkCrystalConversions();
         audioManager = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+        
     }
 
     // Update is called once per frame
     void Update()
     {
+
         if (GameManager.isPaused) return;
 
-        Debug.Log("PlayerState: " + playerState);
+        //Debug.Log("PlayerState: " + playerState);
 
         if (isAtRiskofFalling && playerState != PlayerStates.Falling)
         {
@@ -87,14 +157,10 @@ public class PlayerController : MonoBehaviour
 
         if (isStunned || beingCarried || playerState == PlayerStates.Falling) return;
 
-        Debug.Log("Test");
+        
 
         //Player Movement input
-        Vector2 _movement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        if(_movement != Vector2.zero) _lastMovementDirection = _movement.normalized;
-
-        //Player Looking
-        Vector3 _attackPointDirection = (Vector3.ClampMagnitude(new Vector2(Input.GetAxis("RHorizontal"), Input.GetAxis("RVertical")), .65f)).normalized;
+        if(move.ReadValue<Vector2>() != Vector2.zero) _lastMovementDirection = move.ReadValue<Vector2>().normalized;
 
         //Prevent APD from reseting to zero
         if (_attackPointDirection != Vector3.zero)
@@ -105,7 +171,7 @@ public class PlayerController : MonoBehaviour
         {
             _attackPointDirection = _savedAttackPointDirection;
         }
-
+        
         StaminaRecharge();
 
         //Prevent Movement if sliding
@@ -133,28 +199,15 @@ public class PlayerController : MonoBehaviour
         //Prevent Movement if Interacting
         if (isInteracting) { return; }
 
-        _attackPoint.transform.position = (this.gameObject.transform.position + new Vector3(0, .15f, 0)) + _attackPointDirection;
 
-        transform.position = new Vector2(transform.position.x, transform.position.y) + _movement * (_stats.Speed - _stats.SpeedDebuff) * Time.deltaTime;
+        UpdateAttackPointPosition();
+        //_attackPoint.transform.position = (this.gameObject.transform.position /*+ new Vector3(0, .15f, 0)*/) + _attackPointDirection;
+        //Debug.Log(_attackPoint.transform.position);
 
-        UpdateState(_movement);
+        transform.position = new Vector2(transform.position.x, transform.position.y) + move.ReadValue<Vector2>() * (_stats.Speed - _stats.SpeedDebuff) * Time.deltaTime;
+        
+        UpdateState(move.ReadValue<Vector2>());
         UpdateDirection(_attackPointDirection);
-
-        if (Input.GetButtonDown("Interact")) { Interact(); }
-
-        if (isCarrying) { return; }
-
-        //Player Slide trigger
-        if (Input.GetButtonDown("Slide") && !isSliding) { SlideTrigger(_movement); }
-
-        if (Input.GetAxis("LightMelee") > 0) { LightMeleeAttack(); }
-
-        if (Input.GetAxis("HeavyMelee") > 0) { HeavyMeleeAttack(); }
-
-        if (Input.GetButtonDown("LightRange")) { LightRangeAttack(); }
-
-        if (Input.GetButtonDown("HeavyRange")) { HeavyRangeAttack(); }
-
         
     }
 
@@ -164,6 +217,12 @@ public class PlayerController : MonoBehaviour
         {
             transform.position = carrier.transform.position;
         }
+    }
+
+    void UpdateAttackPointPosition()
+    {
+        _attackPoint.transform.position = (transform.position + new Vector3(0, .15f, 0)) + Vector3.ClampMagnitude(_attackPointDirection, attackPointMaxRadius);
+        //Debug.Log("Attack Point Transformation: " + _attackPoint.transform.position);
     }
 
     public void PickedUp(GameObject Carrier)
@@ -178,8 +237,31 @@ public class PlayerController : MonoBehaviour
         carrier = null;
     }
 
-    void LightMeleeAttack()
+    void LookInput(InputAction.CallbackContext context)
     {
+        if (GameManager.isPaused) return;
+        if (isInteracting || isAttacking || isSliding || isStunned || beingCarried || playerState == PlayerStates.Falling) return;
+
+
+        //Player Looking
+        if (context.control.device.name != "Mouse")
+        {
+            _attackPointDirection = look.ReadValue<Vector2>().normalized;
+        }
+        else
+        {
+            Vector3 screenMousePosition = Camera.main.ScreenToWorldPoint(look.ReadValue<Vector2>());
+
+            Vector2 direction = screenMousePosition - transform.position;
+            _attackPointDirection = direction.normalized;
+        }
+    }
+
+    void LightMeleeAttack(InputAction.CallbackContext context)
+    {
+
+        if (GameManager.isPaused) return;
+        if (isCarrying || isInteracting || isAttacking || isSliding || isStunned || beingCarried || playerState == PlayerStates.Falling) return;
         if (_stats.Stamina - _stats.LightMeleeAttackStaminaCost < 0 || _stats.LightLevel - _stats.LightMeleeAttackLightLevelCost < 0) { return; }
 
         isAttacking = true;
@@ -194,8 +276,11 @@ public class PlayerController : MonoBehaviour
             _stats.LightMeleeAttackDamage, _stats.LightMeleeAttackKnockbackStrength));
     }
 
-    void HeavyMeleeAttack()
+    void HeavyMeleeAttack(InputAction.CallbackContext context)
     {
+        if (GameManager.isPaused) return;
+        if (isCarrying || isInteracting || isAttacking || isSliding || isStunned || beingCarried || playerState == PlayerStates.Falling) return;
+
         if (_stats.Stamina - _stats.HeavyMeleeAttackStaminaCost < 0 || _stats.LightLevel - _stats.HeavyMeleeAttackLightLevelCost < 0) { return; }
 
         isAttacking = true;
@@ -207,8 +292,11 @@ public class PlayerController : MonoBehaviour
             _stats.HeavyMeleeAttackDamage, _stats.HeavyMeleeAttackKnockbackStrength));
     }
 
-    void LightRangeAttack()
+    void LightRangeAttack(InputAction.CallbackContext context)
     {
+        if (GameManager.isPaused) return;
+        if (isCarrying || isInteracting || isAttacking || isSliding || isStunned || beingCarried || playerState == PlayerStates.Falling) return;
+
         if (_stats.Stamina - _stats.LightRangedAttackStaminaCost < 0 || _stats.LightLevel - _stats.LightRangedAttackLightLevelCost < 0) { return; }
 
         isAttacking = true;
@@ -220,8 +308,11 @@ public class PlayerController : MonoBehaviour
             _stats.LightRangedAttackLightLevelCost, _stats.LightRangedAttackKnockbackStrength));
     }
 
-    void HeavyRangeAttack() 
+    void HeavyRangeAttack(InputAction.CallbackContext context) 
     {
+        if (GameManager.isPaused) return;
+        if (isCarrying || isInteracting || isAttacking || isSliding || isStunned || beingCarried || playerState == PlayerStates.Falling) return;
+
         if (_stats.Stamina - _stats.HeavyRangedAttackStaminaCost < 0 || _stats.LightLevel - _stats.HeavyRangedAttackLightLevelCost < 0) { return; }
 
         isAttacking = true;
@@ -233,8 +324,10 @@ public class PlayerController : MonoBehaviour
             _stats.HeavyRangedAttackLightLevelCost, _stats.HeavyRangedAttackKnockbackStrength));
     }
 
-    void Interact()
+    void Interact(InputAction.CallbackContext context)
     {
+        if (GameManager.isPaused) return;
+        if (isInteracting || isAttacking || isSliding || isStunned || beingCarried || playerState == PlayerStates.Falling) return;
         isInteracting = true;
 
         if (isCarrying)
@@ -321,13 +414,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void SlideTrigger(Vector2 movement)
+    void SlideTrigger(InputAction.CallbackContext context)
     {
+        if (GameManager.isPaused) return;
+        if (isCarrying || isInteracting || isAttacking || isSliding || isStunned || beingCarried || playerState == PlayerStates.Falling) return;
+
         if (_stats.Stamina - _stats.SlideStaminaCost < 0) { return; }
 
         isSliding = true;
         LoseStamina(_stats.SlideStaminaCost);
-        Vector3 slideMovement = (movement * 100).normalized;
+        Vector3 slideMovement = (move.ReadValue<Vector2>() * 100).normalized;
         slideDir = slideMovement;
         _playerAnimationController.state = PlayerStates.Sliding;
         StartCoroutine(Slide());

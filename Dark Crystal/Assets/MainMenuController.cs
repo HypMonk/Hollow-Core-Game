@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -10,6 +11,10 @@ public class MainMenuController : MonoBehaviour
     UniversalGameSettings universalGameSettings;
     
     [SerializeField] MainMenuAudio mainMenuAudio;
+
+    PlayerControlsTest _pControls;
+
+    InputAction back;
 
     GameObject _currentMenu, _rootMenu;
 
@@ -20,6 +25,24 @@ public class MainMenuController : MonoBehaviour
     Slider _brightnessSlider, _volumeSlider;
     [SerializeField]
     TMPro.TMP_Text _versionNumber;
+
+    private void Awake()
+    {
+        _pControls = new PlayerControlsTest();
+    }
+
+    private void OnEnable()
+    {
+        back = _pControls.UI.Back;
+        back.Enable();
+        back.performed += BackMenu;
+    }
+
+    private void OnDisable()
+    {
+        back.Disable();
+
+    }
 
     private void Start()
     {
@@ -46,14 +69,9 @@ public class MainMenuController : MonoBehaviour
     private void Update()
     {
         mainMenuAudio.SetVolumeValue(universalGameSettings.Volume);
-
-        if(Input.GetButtonDown("Cancel"))
-        {
-            BackMenu();
-        }
     }
 
-    void BackMenu()
+    void BackMenu(InputAction.CallbackContext context)
     {
         if(_rootMenu == null) { return; }
 

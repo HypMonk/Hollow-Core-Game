@@ -242,7 +242,7 @@ public class LightSuckerLogic : MonoBehaviour
         if (_stats.TargetObject.transform.parent == null) return;
         GameObject targetObjectHoldingLight = _stats.TargetObject.transform.parent.gameObject;
         string targetTag = targetObjectHoldingLight.tag;
-        Debug.Log(targetTag);
+        //Debug.Log(targetTag);
         switch (targetTag)
         {
             case "Player":
