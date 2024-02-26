@@ -87,7 +87,7 @@ public class TorchController : MonoBehaviour
 
             if (lightLevel <= .20)
             {
-                Debug.Log("Fuse Blown");
+                //Debug.Log("Fuse Blown");
                 
                 ToggleLight();
 

@@ -16,13 +16,16 @@ public class UIManager : MonoBehaviour
     UniversalGameSettings universalGameSettings;
 
     List<Dictionary<string, ParameterClass>> _parameterSheets = new List<Dictionary<string, ParameterClass>>();
+    List<GameObject> _controlSchemes = new List<GameObject>();
+    List<GameObject> _controlSchemesMenuToggleControl = new List<GameObject>();
 
     GameObject _currentMenu, _rootMenu;
 
     GameObject _pauseLastSelectedButton, _lastSelectedButton;
 
-    PlayerControlsTest _pControls;
+    int _currentSchemeMenuValue = 1;
 
+    PlayerInput _pInput;
     InputAction back;
 
     [SerializeField]
@@ -33,29 +36,15 @@ public class UIManager : MonoBehaviour
     Image _HUDOverlay;
     [SerializeField]
     GameObject _pauseMenu, _pauseFirstButton, _debugControlMenu, 
-        _debugFirstButton, _settingsMenu, _settingsFirstButton, _controlsMenu, _controlsFirstButton;
+        _debugFirstButton, _settingsMenu, _settingsFirstButton, _controlsMenu, _controlsFirstButton, _firstRebindButtonGamepad, _firstRebindButtonKeyboard,
+        _switchControlSchemeMinusButton, _switchControlSchemePositiveButton;
     [SerializeField]
     TMP_Dropdown _parameterSheetDropDown;
     [SerializeField]
     TMP_Text _parameterReader;
+    [SerializeField]
+    GameObject _keyboardSchemeMenu, _gamepadSchemeMenu;
 
-    private void Awake()
-    {
-        _pControls = new PlayerControlsTest();
-    }
-
-    private void OnEnable()
-    {
-        back = _pControls.UI.Back;
-        back.Enable();
-        back.performed += BackMenu;
-    }
-
-    private void OnDisable()
-    {
-        back.Disable();
-
-    }
 
     // Start is called before the first frame update
     void Start()
@@ -63,6 +52,9 @@ public class UIManager : MonoBehaviour
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         playerStats = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStats>();
         playerInventory = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerInventory>();
+
+        _pInput = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerInput>();
+        back = _pInput.actions["Back"];
 
         universalGameSettings = GameObject.FindGameObjectWithTag("GameSettings").GetComponent<UniversalGameSettings>();
 
@@ -84,6 +76,12 @@ public class UIManager : MonoBehaviour
         //Update Sliders
         _brightnessSlider.value = universalGameSettings.Brightness/universalGameSettings.MaxBrightness;
         _volumeSlider.value = universalGameSettings.Volume/1;
+
+        _controlSchemes.Add(_keyboardSchemeMenu);
+        _controlSchemes.Add(_gamepadSchemeMenu);
+
+        _controlSchemesMenuToggleControl.Add(_firstRebindButtonKeyboard);
+        _controlSchemesMenuToggleControl.Add(_firstRebindButtonGamepad);
     }
 
     // Update is called once per frame
@@ -93,8 +91,15 @@ public class UIManager : MonoBehaviour
         {
             _HUDOverlay.enabled = true;
             _pauseMenu.SetActive(true);
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(_pauseFirstButton);
+            if (_pInput.currentControlScheme != "Keyboard&Mouse")
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current.SetSelectedGameObject(_pauseFirstButton);
+            } else
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+            
         } else if (!GameManager.isPaused && _HUDOverlay.enabled)
         {
             _HUDOverlay.enabled = false;
@@ -110,8 +115,64 @@ public class UIManager : MonoBehaviour
         _staminaBar.value = playerStats.Stamina;
         _powerBar.value = playerStats.LightLevel;
         _shardCount.text = "Shards: " + playerInventory.Shards;
+
+        if (back.triggered)
+        {
+            if (!GameManager.isPaused) return;
+            if (_rootMenu == null)
+            {
+                gameManager.TogglePauseGame();
+                return;
+            }
+
+            if (_rootMenu == _pauseMenu)
+            {
+                ReturnToPause();
+            }
+
+            if (_rootMenu == _settingsMenu)
+            {
+                ReturnToSettings();
+            }
+        }
     }
 
+    public void SwitchControlSchemesMinus()
+    {
+        _controlSchemes[_currentSchemeMenuValue].SetActive(false);
+        _currentSchemeMenuValue--;
+        if (_currentSchemeMenuValue < 0)
+        {
+            _currentSchemeMenuValue = _controlSchemes.Count - 1;
+        }
+        _controlSchemes[_currentSchemeMenuValue].SetActive(true);
+
+        UpdateButtonNav();
+    }
+
+    public void SwitchControlSchemesPlus()
+    {
+        _controlSchemes[_currentSchemeMenuValue].SetActive(false);
+        _currentSchemeMenuValue++;
+        if (_currentSchemeMenuValue > _controlSchemes.Count - 1)
+        {
+            _currentSchemeMenuValue = 0;
+        }
+        _controlSchemes[_currentSchemeMenuValue].SetActive(true);
+
+        UpdateButtonNav();
+    }
+
+    void UpdateButtonNav()
+    {
+        Navigation minusButtonNav = _switchControlSchemeMinusButton.GetComponent<Button>().navigation;
+        minusButtonNav.selectOnDown = _controlSchemesMenuToggleControl[_currentSchemeMenuValue].GetComponent<Button>();
+        _switchControlSchemeMinusButton.GetComponent<Button>().navigation = minusButtonNav;
+
+        Navigation posButtonNav = _switchControlSchemePositiveButton.GetComponent<Button>().navigation;
+        posButtonNav.selectOnDown = _controlSchemesMenuToggleControl[_currentSchemeMenuValue].GetComponent<Button>();
+        _switchControlSchemePositiveButton.GetComponent<Button>().navigation = posButtonNav;
+    }
 
     string BuildTimer()
     {
@@ -127,34 +188,19 @@ public class UIManager : MonoBehaviour
         return _hours + ":" + _minutes + ":" + _seconds;
     }
 
-    void BackMenu(InputAction.CallbackContext context)
-    {
-        if (!GameManager.isPaused) return;
-        if (_rootMenu == null) 
-        {
-            gameManager.TogglePauseGame();
-            return; 
-        }
-
-        if (_rootMenu == _pauseMenu)
-        {
-            ReturnToPause();
-        }
-
-        if (_rootMenu == _settingsMenu)
-        {
-            ReturnToSettings();
-        }
-    }
 
 
 
     //Debug Menu
     public void DebugMenuOpen()
     {
-        _pauseLastSelectedButton = EventSystem.current.currentSelectedGameObject;
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(_debugFirstButton);
+        if (_pInput.currentControlScheme != "Keyboard&Mouse")
+        {
+            _pauseLastSelectedButton = EventSystem.current.currentSelectedGameObject;
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_debugFirstButton);
+        }
+        
         UpdateParameterReader();
 
         _currentMenu = _debugControlMenu;
@@ -164,9 +210,13 @@ public class UIManager : MonoBehaviour
     //Settings Menu
     public void SettingsMenuOpen()
     {
-        _pauseLastSelectedButton = EventSystem.current.currentSelectedGameObject;
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(_settingsFirstButton);
+        if (_pInput.currentControlScheme != "Keyboard&Mouse")
+        {
+            _pauseLastSelectedButton = EventSystem.current.currentSelectedGameObject;
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_settingsFirstButton);
+        }
+        
 
         _currentMenu = _settingsMenu;
         _rootMenu = _pauseMenu;
@@ -175,9 +225,13 @@ public class UIManager : MonoBehaviour
     //Controls Menu
     public void ControlsMenuOpen()
     {
-        _lastSelectedButton = EventSystem.current.currentSelectedGameObject;
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(_controlsFirstButton);
+        if (_pInput.currentControlScheme != "Keyboard&Mouse")
+        {
+            _lastSelectedButton = EventSystem.current.currentSelectedGameObject;
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_controlsFirstButton);
+        }
+        
 
         _currentMenu = _controlsMenu;
         _rootMenu = _settingsMenu;
@@ -188,8 +242,12 @@ public class UIManager : MonoBehaviour
         _currentMenu.SetActive(false);
         _rootMenu.SetActive(true);
 
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(_lastSelectedButton);
+        if (_pInput.currentControlScheme != "Keyboard&Mouse")
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_lastSelectedButton);
+        }
+        
 
         _currentMenu = _settingsMenu;
         _rootMenu = _pauseMenu;
@@ -200,8 +258,12 @@ public class UIManager : MonoBehaviour
         _currentMenu.SetActive(false);
         _rootMenu.SetActive(true);
 
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(_pauseLastSelectedButton);
+        if (_pInput.currentControlScheme != "Keyboard&Mouse")
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_pauseLastSelectedButton);
+        }
+        
 
         _currentMenu = _pauseMenu;
         _rootMenu = null;

@@ -179,7 +179,7 @@ public class TankLogic : MonoBehaviour
 
         if (_stats.CrystalHome.GetComponent<DarkCrystal>().InDanger)
         {
-            Debug.Log("Attack");
+            //Debug.Log("Attack");
             _stats.TargetObject = GameObject.FindGameObjectWithTag("Player");
             directive = Directive.Attack;
             if (lastDirective != directive)
