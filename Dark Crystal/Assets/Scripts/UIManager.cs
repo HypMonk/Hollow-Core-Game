@@ -37,7 +37,7 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     GameObject _pauseMenu, _pauseFirstButton, _debugControlMenu, 
         _debugFirstButton, _settingsMenu, _settingsFirstButton, _controlsMenu, _controlsFirstButton, _firstRebindButtonGamepad, _firstRebindButtonKeyboard,
-        _switchControlSchemeMinusButton, _switchControlSchemePositiveButton;
+        _switchControlSchemeMinusButton, _switchControlSchemePositiveButton, _parametersFirstButton, _parametersMenu;
     [SerializeField]
     TMP_Dropdown _parameterSheetDropDown;
     [SerializeField]
@@ -107,6 +107,7 @@ public class UIManager : MonoBehaviour
             if (_debugControlMenu.activeInHierarchy) {  _debugControlMenu.SetActive(false); }
             if (_settingsMenu.activeInHierarchy) {  _settingsMenu.SetActive(false); }
             if (_controlsMenu.activeInHierarchy) {  _controlsMenu.SetActive(false); }
+            if (_parametersMenu.activeInHierarchy) { _parametersMenu.SetActive(false); }
 
         }
 
@@ -118,6 +119,7 @@ public class UIManager : MonoBehaviour
 
         if (back.triggered)
         {
+
             if (!GameManager.isPaused) return;
             if (_rootMenu == null)
             {
@@ -133,6 +135,11 @@ public class UIManager : MonoBehaviour
             if (_rootMenu == _settingsMenu)
             {
                 ReturnToSettings();
+            }
+
+            if (_rootMenu == _debugControlMenu)
+            {
+                ReturnToDebugMenu();
             }
         }
     }
@@ -189,8 +196,6 @@ public class UIManager : MonoBehaviour
     }
 
 
-
-
     //Debug Menu
     public void DebugMenuOpen()
     {
@@ -200,11 +205,25 @@ public class UIManager : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(_debugFirstButton);
         }
-        
-        UpdateParameterReader();
 
         _currentMenu = _debugControlMenu;
         _rootMenu = _pauseMenu;
+    }
+
+    //Parameter Menu
+    public void ParameterMenuOpen()
+    {
+        if (_pInput.currentControlScheme != "Keyboard&Mouse")
+        {
+            _lastSelectedButton = EventSystem.current.currentSelectedGameObject;
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_parametersFirstButton);
+        }
+
+        UpdateParameterReader();
+        
+        _currentMenu = _parametersMenu;
+        _rootMenu = _debugControlMenu;
     }
 
     //Settings Menu
@@ -250,6 +269,22 @@ public class UIManager : MonoBehaviour
         
 
         _currentMenu = _settingsMenu;
+        _rootMenu = _pauseMenu;
+    }
+
+    public void ReturnToDebugMenu()
+    {
+        _currentMenu.SetActive(false);
+        _rootMenu.SetActive(true);
+
+        if (_pInput.currentControlScheme != "Keyboard&Mouse")
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_lastSelectedButton);
+        }
+
+
+        _currentMenu = _debugControlMenu;
         _rootMenu = _pauseMenu;
     }
 

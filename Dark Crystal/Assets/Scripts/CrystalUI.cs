@@ -16,6 +16,7 @@ public class CrystalUI : MonoBehaviour
     Slider _healthBar, _energyBar;
     [SerializeField]
     Image _inLightIndicator, _rechargingIndicator;
+    public GameObject canvas;
 
     // Update is called once per frame
     void Update()

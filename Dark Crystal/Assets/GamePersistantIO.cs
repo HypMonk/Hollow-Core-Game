@@ -39,6 +39,7 @@ public class GamePersistantIO : MonoBehaviour
 
             StreamReader reader = new StreamReader(versionPath + "Version.txt");
             string savedVersionNumber = reader.ReadLine();
+            reader.Close();
             if (savedVersionNumber != Application.version)
             {
                 WriteVersionFile();

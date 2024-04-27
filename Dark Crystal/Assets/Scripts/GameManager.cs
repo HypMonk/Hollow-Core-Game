@@ -100,12 +100,14 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 0;
             isPaused = true;
             worldSpeaker.StartPauseMusic();
+            _player.GetComponent<PlayerInput>().SwitchCurrentActionMap("UI");
         }
         else
         {
             Time.timeScale = 1;
             isPaused = false;
             worldSpeaker.StopPauseMusic();
+            _player.GetComponent<PlayerInput>().SwitchCurrentActionMap("Player");
         }
     }
 
@@ -137,7 +139,17 @@ public class GameManager : MonoBehaviour
                 Collider2D hit = Physics2D.OverlapCircle((Vector2)crystalSpawnLocations[randomLocationIndex].transform.position, 3, 1 << 9);
                 if (hit == null)
                 {
-                    Instantiate(darkCrystalPrefab, crystalSpawnLocations[randomLocationIndex].transform.position, Quaternion.identity);
+                    GameObject crystal = Instantiate(darkCrystalPrefab, crystalSpawnLocations[randomLocationIndex].transform.position, Quaternion.identity);
+
+                    if (GetComponent<DebugTools>().enableCrystalVisualizer) crystal.GetComponent<CrystalUI>().canvas.SetActive(true);
+                    if (GetComponent<DebugTools>().enableSpawnOverride)
+                    {
+                        crystal.GetComponent<CrystalController>().overrideSpawning = true;
+                        crystal.GetComponent<CrystalController>().mob = (Mob)GetComponent<DebugTools>().mobDropdownChoice;
+                        crystal.GetComponent<CrystalController>().overideSpawnAmount = GetComponent<DebugTools>().mobSpawnAmount;
+                        crystal.GetComponent<CrystalController>().overrideSpawnTimer = GetComponent<DebugTools>().mobSpawnTimer;
+                    }
+
                     spawned = true;
                 }
             }

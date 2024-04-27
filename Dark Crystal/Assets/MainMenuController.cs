@@ -12,6 +12,11 @@ public class MainMenuController : MonoBehaviour
     
     [SerializeField] MainMenuAudio mainMenuAudio;
 
+    List<GameObject> _controlSchemes = new List<GameObject>();
+    List<GameObject> _controlSchemesMenuToggleControl = new List<GameObject>();
+
+    int _currentSchemeMenuValue = 1;
+
     PlayerControlsTest _pControls;
 
     InputAction back;
@@ -20,11 +25,14 @@ public class MainMenuController : MonoBehaviour
 
     GameObject _mainLastSelectedButton, _lastSelectedButton;
     [SerializeField]
-    GameObject _mainMenu, _mainMenuFirstButton, _settingsMenu, _settingsFirstButton, _controlsMenu, _controlsFirstButton;
+    GameObject _mainMenu, _mainMenuFirstButton, _settingsMenu, _settingsFirstButton, _controlsMenu, _controlsFirstButton, _firstRebindButtonGamepad, _firstRebindButtonKeyboard,
+        _switchControlSchemeMinusButton, _switchControlSchemePositiveButton;
     [SerializeField]
     Slider _brightnessSlider, _volumeSlider;
     [SerializeField]
     TMPro.TMP_Text _versionNumber;
+    [SerializeField]
+    GameObject _keyboardSchemeMenu, _gamepadSchemeMenu;
 
     private void Awake()
     {
@@ -64,11 +72,54 @@ public class MainMenuController : MonoBehaviour
 
         _currentMenu = _mainMenu;
         _rootMenu = null;
+
+        _controlSchemes.Add(_keyboardSchemeMenu);
+        _controlSchemes.Add(_gamepadSchemeMenu);
+
+        _controlSchemesMenuToggleControl.Add(_firstRebindButtonKeyboard);
+        _controlSchemesMenuToggleControl.Add(_firstRebindButtonGamepad);
     }
 
     private void Update()
     {
         mainMenuAudio.SetVolumeValue(universalGameSettings.Volume);
+    }
+
+    public void SwitchControlSchemesMinus()
+    {
+        _controlSchemes[_currentSchemeMenuValue].SetActive(false);
+        _currentSchemeMenuValue--;
+        if (_currentSchemeMenuValue < 0)
+        {
+            _currentSchemeMenuValue = _controlSchemes.Count - 1;
+        }
+        _controlSchemes[_currentSchemeMenuValue].SetActive(true);
+
+        UpdateButtonNav();
+    }
+
+    public void SwitchControlSchemesPlus()
+    {
+        _controlSchemes[_currentSchemeMenuValue].SetActive(false);
+        _currentSchemeMenuValue++;
+        if (_currentSchemeMenuValue > _controlSchemes.Count - 1)
+        {
+            _currentSchemeMenuValue = 0;
+        }
+        _controlSchemes[_currentSchemeMenuValue].SetActive(true);
+
+        UpdateButtonNav();
+    }
+
+    void UpdateButtonNav()
+    {
+        Navigation minusButtonNav = _switchControlSchemeMinusButton.GetComponent<Button>().navigation;
+        minusButtonNav.selectOnDown = _controlSchemesMenuToggleControl[_currentSchemeMenuValue].GetComponent<Button>();
+        _switchControlSchemeMinusButton.GetComponent<Button>().navigation = minusButtonNav;
+
+        Navigation posButtonNav = _switchControlSchemePositiveButton.GetComponent<Button>().navigation;
+        posButtonNav.selectOnDown = _controlSchemesMenuToggleControl[_currentSchemeMenuValue].GetComponent<Button>();
+        _switchControlSchemePositiveButton.GetComponent<Button>().navigation = posButtonNav;
     }
 
     void BackMenu(InputAction.CallbackContext context)

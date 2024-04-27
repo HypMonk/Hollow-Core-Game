@@ -11,18 +11,14 @@ public class CrystalController : MonoBehaviour
     [SerializeField]
     GameObject lightSuckerPrefab, flyerPrefab, tankPrefab;
 
-    [SerializeField]
-    bool overrideSpawning = false;
-    [SerializeField]
+    public bool overrideSpawning = false;
     [Range(1,4)]
-    int overideSpawnAmount;
-    [SerializeField]
+    public int overideSpawnAmount;
     [Range(1, 100)]
-    float overrideSpawnTimer;
+    public float overrideSpawnTimer;
 
-    [SerializeField] Mob mob;
+    [SerializeField] public Mob mob;
 
-    enum Mob { LightSucker, Flyer, Tank}
 
     // Start is called before the first frame update
     void Start()
@@ -323,3 +319,5 @@ public class CrystalController : MonoBehaviour
         }
     }
 }
+
+public enum Mob { LightSucker, Flyer, Tank }
